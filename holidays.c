@@ -129,18 +129,7 @@ void checkHolidays(void)
 	render_buffer_size = 0;
 
 	checkWeekDays();
-/*
-	holiday = 1;
-	render_buffer_size = 1;
-	render_buffer[0] = ELEMENTS(holidays);
-*/
-/*
-	if(1) {
-		holiday = 1;
-		renderHoliday(holidays[0].length, holidays[0].ptr);
-		return;
-	}
-*/
+
 	for(i=0; (i < ELEMENTS(holidays)) && (holiday == 0); i++) {
 		switch(( holidays[i].month & 0xF0) >> 4) {
 			case 0: {
