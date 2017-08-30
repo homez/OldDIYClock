@@ -17,7 +17,7 @@ float	ftemp;
 
 void bmxx80write8(uint8_t reg, uint8_t value)
 {
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(reg);
 	I2CswWriteByte(value);
 	I2CswStop();
@@ -29,9 +29,9 @@ uint8_t bmxx80read8(uint8_t reg)
 {
 	uint8_t result;
 
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(reg);
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/ | I2C_READ);
+	I2CswStart(bmxx80_Address | I2C_READ);
 	result = I2CswReadByte(I2C_NOACK);
 	I2CswStop();
 
@@ -42,9 +42,9 @@ uint16_t bmxx80read16(uint8_t reg)
 {
 	uint16_t result;
 
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(reg);
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/ | I2C_READ);
+	I2CswStart(bmxx80_Address | I2C_READ);
 	result = ((uint16_t)I2CswReadByte(I2C_ACK)) << 8;
 	result |= I2CswReadByte(I2C_NOACK);
 	I2CswStop();
@@ -57,9 +57,9 @@ uint16_t bmxx80read16_LE(uint8_t reg)
 {
 	uint16_t result;
 
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(reg);
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/ | I2C_READ);
+	I2CswStart(bmxx80_Address | I2C_READ);
 	result = I2CswReadByte(I2C_ACK);
 	result |= ((uint16_t)I2CswReadByte(I2C_NOACK)) << 8;
 	I2CswStop();
@@ -90,9 +90,9 @@ uint32_t bmx280read24(uint8_t reg)
 {
 	uint32_t result;
 
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(reg);
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/ | I2C_READ);
+	I2CswStart(bmxx80_Address | I2C_READ);
 	result = ((uint32_t)I2CswReadByte(I2C_ACK)) << 12;
 	result |= ((uint32_t)I2CswReadByte(I2C_ACK)) << 4;
 	result |= I2CswReadByte(I2C_NOACK) >> 4;
@@ -159,7 +159,7 @@ uint16_t bmp180GetRawData(uint8_t param)
 {
 	uint16_t ret;
 
-	I2CswStart(bmxx80_Address/*BMXX80_ADDR*/);
+	I2CswStart(bmxx80_Address);
 	I2CswWriteByte(BMXX80_REGISTER_CONTROL);
 	I2CswWriteByte(param);
 	I2CswStop();
