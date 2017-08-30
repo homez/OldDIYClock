@@ -2,7 +2,7 @@
 #include "display.h"
 #include "pinout.h"
 #include "rtc.h"
-#include "bmp180.h"
+#include "bmxx80.h"
 #include "si7021.h"
 #include "key.h"
 #include "settings.h"
@@ -324,7 +324,7 @@ void showDayWeek(void)
 void showTemperature(void)
 {
 	uint8_t i;
-	int8_t temp = eep.ktemp;
+	int8_t temp = eep.tempcoef;
 	temp += rtc.temp;
 
 	if (temp > 99) {
@@ -373,7 +373,7 @@ void showPressure(void)
 	static uint8_t buf[4];
 	uint8_t code *sptr;
 	int8_t i;
-	int16_t pres = bmp180GetPressure();
+	int16_t pres = bmxx80GetPressure();
 
 	for (i = 0; i < 4; i++)
 		buf[i] = 0;
@@ -423,7 +423,13 @@ void showHumidity(void)
 	static uint8_t buf[5];
 	uint8_t code *sptr;
 	int8_t i;
-	uint16_t humi = si7021GetHumidity();
+	uint16_t humi = 0;
+	if(si7021SensorExists()) {
+		humi = si7021GetHumidity();
+	}
+	else if(bmxx80HaveSensor()==BME280_CHIP_ID){
+		humi = bme280GetHumidity();
+	}
 
 	for (i = 0; i < 5; i++)
 		buf[i] = 0;
@@ -926,7 +932,7 @@ void showTimeCoefEdit(void)
 
 void changeTempCoef(int8_t diff)
 {
-	checkParam(&eep.ktemp, diff, eepMin.ktemp/*-9*/, eepMax.ktemp/*9*/);
+	checkParam(&eep.tempcoef, diff, eepMin.tempcoef/*-9*/, eepMax.tempcoef/*9*/);
 
 	return;
 }

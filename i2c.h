@@ -11,7 +11,6 @@
 #define SDA sda
 #define SCL scl
 
-//#define I2C_Delay delay_5us(1);
 #define I2C_Delay delay_1us();
 
 void I2CswStart(uint8_t addr);

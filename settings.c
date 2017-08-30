@@ -10,7 +10,7 @@ code EEP_Param eepMax = {0xFF, 1, 5, 4, 4, 1, 6, 1, 23, 59, 1, 1, 1, 1, 1, 1, 1,
 
 static uint8_t workSector = 0;
 
-void settingsFirstEnable(void)
+static void settingsFirstEnable(void)
 {
 	bit needDef = 1;
 	uint8_t i;
@@ -46,10 +46,12 @@ void settingsSave(void)
 	uint8_t i;
 	IapEraseSector(workSector);
 	/*
+
 	 у STC15W1K24S 10 блоков(секторов) по 512 байт, вроде как рассчитаных на 100к стераний.
 	 после стерания нужно удостовериться что блок стерся и содержит 0xFF,
 	 если нет то в первый байт блока записать 0,
 	 и начать использовать следующий блок (workSector++).
+
 	*/
 	for( i=0; i < sizeof(EEP_Param); i++) {
 		IapProgramByte((workSector <<9) + i, *((uint8_t*)&eep + i));

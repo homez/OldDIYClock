@@ -429,9 +429,9 @@
               <FilePath>.\holidays.c</FilePath>
             </File>
             <File>
-              <FileName>bmp180.c</FileName>
+              <FileName>bmxx80.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\bmp180.c</FilePath>
+              <FilePath>.\bmxx80.c</FilePath>
             </File>
             <File>
               <FileName>si7021.c</FileName>

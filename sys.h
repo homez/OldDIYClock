@@ -7,15 +7,6 @@
 #define SYSCLK_11 11059
 #define SYSCLK SYSCLK_18
 
-/*
-
-#define i8 signed char
-#define u8 unsigned char
-#define i16 signed int
-#define u16 unsigned int
-
-*/
-
 #define int8_t signed char
 #define uint8_t unsigned char
 #define int16_t signed int

@@ -7,16 +7,6 @@ uint8_t keytest;
 
 void timer1Init(void)
 {
-	/*
- 	//4ms@18.432MHz
-	AUXR &= 0xBF;	// 12T
-	TMOD &= 0x0F;
-	TL1 = 0x00;
-	TH1 = 0xE8;
-	TF1 = 0;
-	TR1 = 1;
- 	ET1 = 1;
-	*/
 
 	return;
 }
@@ -65,7 +55,6 @@ void timer0_isr(void) interrupt 1
 
 void timer1_isr(void) interrupt 3
 {
-	//CheckBtn();
 
 	return;
 }

@@ -47,7 +47,7 @@ typedef struct {
 	int8_t sat;
 	int8_t sun;
 	
-	int8_t ktemp;
+	int8_t tempcoef;
 	int8_t timecoef;
 } EEP_Param;
 

@@ -9,7 +9,8 @@
 #include "holidays.h"
 #include "delay.h"
 #include "i2c.h"
-#include "bmp180.h"
+
+#include "bmxx80.h"
 #include "si7021.h"
 
 void hwInit(void)
@@ -24,7 +25,7 @@ void hwInit(void)
 
 	alarmInit();
 
-	bmp180Init();
+	bmxx80Init();
 
 	si7021Init();
 
@@ -75,7 +76,7 @@ void main(void)
 			if (sensTimer == 0) {
 				sensTimer = SENSOR_POLL_INTERVAL;
 
-				if (bmp180HaveSensor()) bmp180Convert();
+				if (bmxx80HaveSensor()) bmxx80Convert();
 				if (si7021SensorExists()) si7021Convert();
 			}
 			checkAlarm();
@@ -268,7 +269,7 @@ void main(void)
 					case WI_WEEK: {if(screenTime > 2 ){ widgetNumber++; screenTime = 0;} break;}
 					case WI_TEMP: {
 						if(screenTime > 2 ){
-							if(bmp180HaveSensor()) {
+							if(bmxx80HaveSensor()) {
 								widgetNumber = WI_PRES;
 							}
 							else if(si7021SensorExists()) {
@@ -286,7 +287,7 @@ void main(void)
 					}
 					case WI_PRES: {
 						if(screenTime > 2 ){
-							if(bmp180HaveSensor()==BME280||si7021SensorExists()) {
+							if(bmxx80HaveSensor()==BME280_CHIP_ID||si7021SensorExists()) {
 								widgetNumber++;
 							}
 							else if(holiday){

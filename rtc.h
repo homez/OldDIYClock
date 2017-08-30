@@ -3,8 +3,7 @@
 
 #include "sys.h"
 
-#define RTC_I2C_ADDR		0xD0
-//#define RTC_TEMP		0x11
+#define RTC_I2C_ADDR		0x68 << 1
 
 enum {
 	RTC_SEC = 0,
