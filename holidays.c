@@ -32,7 +32,8 @@ code char hd_08_02[] = "День Воздушно-десантных войск.";
 code char hd_08_12[] = "День Военно-воздушных сил.";
 code char hd_09_01[] = "День знаний.";
 code char hd_10_05[] = "День учителя.";
-code char hd_11_18[] = "День рождения Деда Мороза";
+code char hd_11_18[] = "День рождения Деда Мороза.";
+code char hd_12_22[] = "День энергетика.";
 
 code char hd_256_day[] = "День программиста.";
 code char hd_06_medicalday[] = "День медицинского работника.";
@@ -69,6 +70,7 @@ HOLIDAY code holidays[] = {
 		hAN( 9, 1, hd_09_01 ),
 		hAN( 10, 5, hd_10_05 ),
 		hAN( 11, 18, hd_11_18 ),
+		hAN( 12, 22, hd_12_22 ),
 		hADN( 256, hd_256_day ),
 		hAWN( 6, W3, SUN, hd_06_medicalday ),
 		hAWL( 7, FRY, hd_07_lastfriday ),
