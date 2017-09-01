@@ -135,7 +135,7 @@ void resetDispLoop(void)
 
 void checkAlarm(void)
 {
-	static uint8_t firstCheck = 1;
+	static bit firstCheck = 1;
 
 	rtcReadTime();
 
@@ -180,8 +180,8 @@ void showDS3231(void)
 {
 	uint8_t i, code *sptr = &pic_DS3231[0];
 
-	for(i=0; i<DISPLAYSIZE; i++, sptr++) {
-		disp[i] = *sptr;
+	for(i=0; i<DISPLAYSIZE; i++, sptr++, pdisp++) {
+		*pdisp = *sptr;
 	}
 
 	return;
@@ -326,6 +326,17 @@ void showTemperature(void)
 	uint8_t i;
 	int8_t temp = eep.tempcoef;
 	temp += rtc.temp;
+
+	if(si7021SensorExists() ) {
+		temp = (si7021GetTemp() / 5);
+		if(temp & 1 ) temp += 1;
+		temp >>= 1;
+	}
+	else if(bmxx80HaveSensor() ) {
+		temp = (bmxx80GetTemp() / 5 );
+		if(temp & 1 ) temp += 1;
+		temp >>= 1;
+	}
 
 	if (temp > 99) {
 		for(i=0; i<4; i++, pdisp++) {

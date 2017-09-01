@@ -54,16 +54,6 @@ int16_t _getCelsiusPostHumidity()
 	return ((17572 * tempraw) >> 16) - 4685;
 }
 
-uint16_t getHumidityPercent()
-{
-	int32_t humraw;
-	uint8_t humbytes[2];
-	_command(SI7021_MEASURE_HUM_NOHOLD_CMD, humbytes);
-	humraw = (int32_t)humbytes[0] << 8 | humbytes[1];
-	humraw &= 0xFFFC;
-	return ((125 * humraw) >> 16) - 6;
-}
-
 uint16_t getHumidityBasisPoints() {
 	int32_t humraw;
 	uint8_t humbytes[2];
@@ -87,8 +77,8 @@ void si7021Init(void)
 
 void si7021Convert(void)
 {
-	celsiusHundredths = _getCelsiusPostHumidity();
-	humidityPercent = getHumidityBasisPoints/*getHumidityPercent*/();
+	celsiusHundredths = _getCelsiusPostHumidity()/10; // 0.1
+	humidityPercent = getHumidityBasisPoints();
 }
 
 int16_t si7021GetTemp(void)

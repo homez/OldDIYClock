@@ -149,6 +149,7 @@ void bmp280_set_sampling(void)
 	bmxx80write8(BME280_REGISTER_CONFIG, 0x00);
 	bmxx80write8(BMXX80_REGISTER_CONTROL, 0xAB);
 }
+
 void bme280_set_sampling(void)
 {
 	bmxx80write8(BME280_REGISTER_CONTROLHUMID, 0x05);
@@ -245,7 +246,7 @@ void bmp180convert (void)
 		x2 = ((int32_t)cd.mc << 11) / (x1 + cd.md);
 		b5 = x1 + x2;
 
-		temperature = (b5 + 8) >> 4;
+		temperature = (b5 + 8) >> 4;	// 0.1
 
 		b6 = b5 - 4000;
 		b8 = (b6 * b6) >> 12;
@@ -272,7 +273,9 @@ void bmp180convert (void)
 void bmx280compensate_temperature(void)
 {
 	int32_t var1, var2;
+
 	uint32_t adc_T = bmx280read24(BMX280_REGISTER_TEMPDATA);
+
 	if (adc_T == 0x80000)
 		return;
 	
@@ -280,7 +283,7 @@ void bmx280compensate_temperature(void)
 	var2 = (((((adc_T>>4) - ((int32_t)cd2.dig_T1)) * ((adc_T>>4) - ((int32_t)cd2.dig_T1))) >> 12) * ((int32_t)cd2.dig_T3)) >> 14;
 
 	t_fine = var1 + var2;
-	temperature = (t_fine * 5 + 128) >> 8; // 0.01
+	temperature = ((t_fine * 5 + 128) >> 8) / 10; // 0.1
 
 	return;
 }
@@ -322,8 +325,10 @@ void bme280compensate_humidity(void)
 {
 	int32_t adc_H;
 	int32_t v_x1_u32r;
+
 	bmx280compensate_temperature(); // must be done first to get t_fine
 	adc_H = bmxx80read16(BME280_REGISTER_HUMIDDATA);
+
 	if (adc_H == 0x8000) // value in case humidity measurement was disabled
 		return;
 	v_x1_u32r = (t_fine - ((int32_t)76800));
