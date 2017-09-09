@@ -10,6 +10,7 @@
 #include "fonts.h"
 #include "weekpicture.h"
 #include "menupicture.h"
+#include "holidays.h"
 
 uint8_t data disp[DISPLAYSIZE];
 uint8_t render_buffer_size = 0;
@@ -28,6 +29,20 @@ bit reversed;
 bit refstart;
 uint8_t refcount;
 uint8_t dotcount;
+
+void wiNext(void);
+void wiTime(void);
+void wiHoly(void);
+
+Widget code widgets[7] = {
+	{5, wiTime}, /* WI_TIME */
+	{2, wiNext}, /* WI_DATE */ 
+	{2, wiNext}, /* WI_WEEK */ 
+	{2, wiNext}, /* WI_TEMP */ 
+	{2, wiNext}, /* WI_PRES */ 
+	{2, wiNext}, /* WI_HUMI */ 
+	{0, wiHoly}, /* WI_HOLY */ 
+};
 
 void displayInit(void)
 {
@@ -953,6 +968,53 @@ void showTempCoefEdit(void)
 	pdisp = &disp[0];
 
 	showTemperature();
+
+	return;
+}
+
+void wiNext(void)
+{
+	if( screenTime > widgets[widgetNumber].sec ) {
+		widgetNumber++;
+		screenTime = 0;
+		if( widgetNumber > ELEMENTS(widgets) ) {
+			widgetNumber = 0;
+		}
+		if(widgetNumber == WI_PRES && !bmxx80HaveSensor()) {
+			widgetNumber = WI_HUMI;
+		}
+		if(widgetNumber == WI_HUMI && ( !(bmxx80HaveSensor()==BME280_CHIP_ID||si7021SensorExists()) )) {
+			widgetNumber = WI_HOLY;
+		}
+		if(widgetNumber == WI_HOLY) {
+			if(holiday) {
+				scroll_index = 0;
+			}
+			else {
+				widgetNumber = WI_TIME;
+				scroll_index = -1;
+			}
+		}
+	}
+
+	return;
+}
+
+void wiTime(void)
+{
+	if(eep.dispMode == 1) {
+		screenTime = 0;
+	}
+	wiNext();
+
+	return;
+}
+
+void wiHoly(void)
+{
+	if(scroll_index < 0){
+		wiNext();
+	}
 
 	return;
 }

@@ -35,6 +35,14 @@ enum {
 	WI_HOLY
 };
 
+typedef void __wi_func(void); 
+typedef __wi_func *__ptr_wi_func;
+
+typedef struct {
+	uint8_t sec;
+	__wi_func code *func;
+} Widget;
+
 #define DISPLAYSIZE 22
 #define RENDSERBUFFERSIZE 254
 #define hbd(a,b) a | (b << 4)
@@ -52,6 +60,7 @@ extern bit refstart;
 extern uint8_t refcount;
 extern uint8_t dotcount;
 extern bit reversed;
+extern Widget code widgets[7];
 
 void displayInit(void);
 void displayClear(void);

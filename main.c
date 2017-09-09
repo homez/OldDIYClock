@@ -260,62 +260,8 @@ void main(void)
 		if( dotcount > 59 ) dotcount = 0;
 		if( refcount > 59 ) {
 			refcount = 0;
-			if( /*eep.screenMode < 4*/ 1 ) {
-				screenTime++;
-				switch( widgetNumber )
-				{
-					case WI_TIME: {if(screenTime > 5 ){ widgetNumber++; screenTime = 0;} break;}
-					case WI_DATE: {if(screenTime > 2 ){ widgetNumber++; screenTime = 0;} break;}
-					case WI_WEEK: {if(screenTime > 2 ){ widgetNumber++; screenTime = 0;} break;}
-					case WI_TEMP: {
-						if(screenTime > 2 ){
-							if(bmxx80HaveSensor()) {
-								widgetNumber = WI_PRES;
-							}
-							else if(si7021SensorExists()) {
-									widgetNumber = WI_HUMI;
-							}
-							else if(holiday){
-								widgetNumber = WI_HOLY; scroll_index = 0;
-							}
-							else {
-								widgetNumber = WI_TIME;
-							}
-							screenTime = 0;
-						}
-						break;
-					}
-					case WI_PRES: {
-						if(screenTime > 2 ){
-							if(bmxx80HaveSensor()==BME280_CHIP_ID||si7021SensorExists()) {
-								widgetNumber++;
-							}
-							else if(holiday){
-								widgetNumber = WI_HOLY; scroll_index = 0;
-							}
-							else {
-								widgetNumber = WI_TIME;
-							}
-							screenTime = 0;
-						}
-						break;
-					}
-					case WI_HUMI: {
-						if(screenTime > 2 ){
-							if(holiday){
-								widgetNumber = WI_HOLY; scroll_index = 0;
-							}
-							else {
-								widgetNumber = WI_TIME;
-							}
-							screenTime = 0;
-						}
-						break;
-					}
-					case WI_HOLY: {if(scroll_index < 0){widgetNumber = WI_TIME; screenTime = 0;} break;}
-					default: { widgetNumber = WI_TIME; screenTime = 0; break;}
-				}
-			}
+			screenTime++;
+			((__ptr_wi_func)widgets[widgetNumber].func)();
 		}
 	}
 	
