@@ -342,12 +342,12 @@ void showTemperature(void)
 	int8_t temp = eep.tempcoef;
 	temp += rtc.temp;
 
-	if(si7021SensorExists() ) {
+	if( /*eep.tempsource == TS_SI &&*/ si7021SensorExists() ) {
 		temp = (si7021GetTemp() / 5);
 		if(temp & 1 ) temp += 1;
 		temp >>= 1;
 	}
-	else if(bmxx80HaveSensor() ) {
+	else if ( /*eep.tempsource == TS_BMP &&*/ bmxx80HaveSensor() ) {
 		temp = (bmxx80GetTemp() / 5 );
 		if(temp & 1 ) temp += 1;
 		temp >>= 1;
@@ -978,7 +978,7 @@ void wiNext(void)
 		widgetNumber++;
 		screenTime = 0;
 		if( widgetNumber > ELEMENTS(widgets) ) {
-			widgetNumber = 0;
+			widgetNumber = WI_TIME;
 		}
 		if(widgetNumber == WI_PRES && !bmxx80HaveSensor()) {
 			widgetNumber = WI_HUMI;

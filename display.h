@@ -35,6 +35,12 @@ enum {
 	WI_HOLY
 };
 
+enum {
+	TS_DS = 0,
+	TS_SI,
+	TS_BMP
+};
+
 typedef void __wi_func(void); 
 typedef __wi_func *__ptr_wi_func;
 

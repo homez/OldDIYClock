@@ -24,6 +24,7 @@ enum {
 	EEP_ALARM_SUN,
 	EEP_TEMP_COEF,
 	EEP_TIME_COEF,
+	EEP_TEMP_SOURCE,
 };
 
 typedef struct {
@@ -49,6 +50,7 @@ typedef struct {
 	
 	int8_t tempcoef;
 	int8_t timecoef;
+	int8_t tempsource;
 } EEP_Param;
 
 extern EEP_Param eep;
