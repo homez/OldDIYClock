@@ -339,8 +339,7 @@ void showDayWeek(void)
 void showTemperature(void)
 {
 	uint8_t i;
-	int8_t temp = eep.tempcoef;
-	temp += rtc.temp;
+	int8_t temp = 0;
 
 	if( /*eep.tempsource == TS_SI &&*/ si7021SensorExists() ) {
 		temp = (si7021GetTemp() / 5);
@@ -352,6 +351,10 @@ void showTemperature(void)
 		if(temp & 1 ) temp += 1;
 		temp >>= 1;
 	}
+	else {
+		temp = rtc.temp;
+	}
+	temp += eep.tempcoef;
 
 	if (temp > 99) {
 		for(i=0; i<4; i++, pdisp++) {
