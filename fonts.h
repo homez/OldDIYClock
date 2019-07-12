@@ -12,6 +12,7 @@ extern const uint8_t code num_font3[];
 extern const uint8_t code num_font4[];
 extern const uint8_t code num_font5[];
 extern const uint8_t code temperature_font[];
+extern const uint8_t code num_mini[];
 extern const uint8_t code font_cp1251_07[];
 
 #endif /* _FONTS_H_ */

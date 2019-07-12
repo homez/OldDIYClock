@@ -7,12 +7,13 @@
 #define SYSCLK_11 11059
 #define SYSCLK SYSCLK_18
 
-#define int8_t signed char
-#define uint8_t unsigned char
-#define int16_t signed int
-#define uint16_t unsigned int
-#define int32_t signed long
-#define uint32_t unsigned long
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned long uint32_t;
+
+typedef signed char int8_t;
+typedef short int16_t;
+typedef long int32_t;
 
 #define ELEMENTS(a) sizeof(a) / sizeof(a[0])
 	

@@ -130,7 +130,6 @@ void checkHolidays(void)
 	uint8_t i;
 
 	holiday = 0;
-	render_buffer_size = 0;
 
 	checkWeekDays();
 
@@ -139,7 +138,7 @@ void checkHolidays(void)
 			case 0: {
 				if((holidays[i].day == rtc.date) && ((holidays[i].month & 0x0F) == rtc.month)) {
 					holiday = 1;
-					renderHoliday(holidays[i].length, holidays[i].ptr);
+					setRenderString(holidays[i].length, holidays[i].ptr);
 					break;
 				}
 				break;
@@ -151,27 +150,26 @@ void checkHolidays(void)
 			case 5: {
 				if(((holidays[i].month & 0x0F) == rtc.month)&&(rtc.wday == holidays[i].day)&&checkWeekDay((( holidays[i].month & 0x70) >> 4)-1)) {
 					holiday = 1;
-					renderHoliday(holidays[i].length, holidays[i].ptr);
+					setRenderString(holidays[i].length, holidays[i].ptr);
 				}
 				break;
 			}
 			case 6: {
 				if(rtcYearDay()==((((uint16_t)holidays[i].month & 0x01) << 8) | holidays[i].day)) {
 					holiday = 1;
-					renderHoliday(holidays[i].length, holidays[i].ptr);
+					setRenderString(holidays[i].length, holidays[i].ptr);
 				}
 				break;
 			}
 			case 7: {
 				if(((holidays[i].month & 0x0F) == rtc.month)&&(rtc.wday == holidays[i].day)&&checkLastWeek()) {
 					holiday = 1;
-					renderHoliday(holidays[i].length, holidays[i].ptr);
+					setRenderString(holidays[i].length, holidays[i].ptr);
 				}
 				break;
 			}
 			default: {
 				holiday = 0;
-				render_buffer_size = 0;
 			}
 		}
 	}

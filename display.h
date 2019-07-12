@@ -6,6 +6,9 @@
 
 #define PARAM_UP				1
 #define PARAM_DOWN				-1
+#define SPACELINE 		writeToPtr(0x00);
+#define SCROLLDIV 		2
+
 
 enum {
 	MODE_MAIN = 0,
@@ -23,6 +26,12 @@ enum {
 	MODE_TEST,
 
 	MODE_END
+};
+
+enum {
+	BACK = 0,
+	SAVEANDBACK,
+	CANCELANDBACK,
 };
 
 enum {
@@ -50,15 +59,11 @@ typedef struct {
 } Widget;
 
 #define DISPLAYSIZE 22
-#define RENDSERBUFFERSIZE 254
 #define hbd(a,b) a | (b << 4)
 
 extern uint8_t dispMode;
 extern uint8_t data disp[DISPLAYSIZE];
-extern uint8_t xdata render_buffer[RENDSERBUFFERSIZE];
 extern uint8_t displayBright;
-extern uint8_t render_buffer_size;
-extern int16_t scroll_index;
 extern uint8_t menuNumber;
 extern uint8_t screenTime;
 extern uint8_t widgetNumber;
@@ -71,7 +76,7 @@ extern Widget code widgets[7];
 void displayInit(void);
 void displayClear(void);
 void displayRefresh(void);
-void resetDispLoop(void);
+void backToMainMode(uint8_t mode);
 void checkAlarm(void);
 void updateFont(void);
 void showMainScreen(void);
@@ -96,6 +101,7 @@ void showTimeCoefEdit(void);
 void changeTempCoef(int8_t diff);
 void showTempCoefEdit(void);
 void showRenderBuffer(void);
-void renderHoliday(uint8_t length, char *str);
+void incRenderIndex(void);
+void setRenderString(uint8_t length, char *str);
 
 #endif /* _DISPLAY_H_ */

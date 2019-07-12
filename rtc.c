@@ -65,6 +65,7 @@ void rtcInit(void)
 	wday = rtc.wday;
 	rtcWeekDay();
 	if(wday != rtc.wday) {
+		rtc.year = 19;
 		rtcSaveDate();
 	}
 

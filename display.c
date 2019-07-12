@@ -13,9 +13,17 @@
 #include "holidays.h"
 
 uint8_t data disp[DISPLAYSIZE];
-uint8_t render_buffer_size = 0;
-int16_t scroll_index = -1;
-uint8_t xdata render_buffer[RENDSERBUFFERSIZE];
+
+bit scroll_start;
+uint8_t scroll_disp_index;
+
+uint8_t msg_length;
+uint8_t *msg_str;
+uint8_t rndr_disp_index;
+uint8_t rndr_index;
+uint8_t rndr_line;
+
+
 uint8_t *pdisp;
 uint8_t code *fptr;
 uint8_t displayBright;
@@ -29,6 +37,7 @@ bit reversed;
 bit refstart;
 uint8_t refcount;
 uint8_t dotcount;
+uint8_t buf[5];
 
 void wiNext(void);
 void wiTime(void);
@@ -58,7 +67,7 @@ void displayInit(void)
 	refstart = 0;
 	reversed = key_mer;
 	updateFont();
-	pdisp = &render_buffer[0];
+	pdisp = &disp[0];
 
 	return;
 }
@@ -139,11 +148,29 @@ void displayRefresh(void)
 	return;
 }
 
-void resetDispLoop(void)
+void backToMainMode(uint8_t mode)
 {
-	dispMode = MODE_MAIN;
-	screenTime = 0;
-	widgetNumber = 0;
+	switch(mode) {
+		case SAVEANDBACK:
+		case CANCELANDBACK: {
+				while(refstart == 0) {}
+				displayClear();
+				EA = 0;
+				if (mode == SAVEANDBACK) {
+					settingsSave();
+				}
+				else {
+					settingsInit();
+				}
+				EA = 1;
+		}
+		default:
+		case BACK: {
+			dispMode = MODE_MAIN;
+			screenTime = 0;
+			widgetNumber = 0;
+		}
+	}
 
 	return;
 }
@@ -189,6 +216,12 @@ void updateFont(void)
 	}
 
 	return;
+}
+
+void writeToPtr(uint8_t value)
+{
+	*pdisp = value;
+	pdisp++;
 }
 
 void showDS3231(void)
@@ -255,6 +288,23 @@ void showDot(void)
 	}
 
 	return;
+}
+
+void showDigit(uint8_t digit)
+{
+	uint8_t i, code *sptr;
+	for(i=0; i<4; i++, pdisp++) {
+		sptr = fptr + (4*digit+i);
+		*pdisp = *sptr;
+	}
+}
+
+void showMiniDigit(uint8_t digit)
+{
+	uint8_t i;
+	for(i=0; i<3; i++, pdisp++) {
+		*pdisp = num_mini[3*digit+i];
+	}
 }
 
 void showNumber(uint8_t num, uint8_t clean, uint8_t dig )
@@ -363,10 +413,8 @@ void showTemperature(void)
 		for(i=0; i<5; i++, pdisp++) {
 			*pdisp = temperature_font[50+i];
 		}
-		*pdisp = 0x00;
-		pdisp++;
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
+		SPACELINE;
 	}
 	else {
 		if (temp > 9) {
@@ -379,17 +427,14 @@ void showTemperature(void)
 				*pdisp = 0x00;
 			}
 		}
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 
 		for(i=0; i<5; i++, pdisp++) {
 			*pdisp = temperature_font[5*(temp%10)+i];
 		}
 	}
-	*pdisp = 0x00;
-	pdisp++;
-	*pdisp = 0x00;
-	pdisp++;
+	SPACELINE;
+	SPACELINE;
 	for(i=0; i<9; i++, pdisp++) {
 		*pdisp = temperature_font[55+i];
 	}
@@ -399,8 +444,6 @@ void showTemperature(void)
 
 void showPressure(void)
 {
-	static uint8_t buf[4];
-	uint8_t code *sptr;
 	int8_t i;
 	int16_t pres = bmxx80GetPressure();
 
@@ -414,43 +457,52 @@ void showPressure(void)
 		i--;
 		pres /= 10;
 	}
-
-	for(i=0; i<4; i++, pdisp++) {
-		sptr = fptr + (4*buf[0]+i);
-		*pdisp = *sptr;
-	}
-	*pdisp = 0x00;
-	pdisp++;
-	for(i=0; i<4; i++, pdisp++) {
-		sptr = fptr + (4*buf[1]+i);
-		*pdisp = *sptr;
-	}
-	*pdisp = 0x00;
-	pdisp++;
-	for(i=0; i<4; i++, pdisp++) {
-		sptr = fptr + (4*buf[2]+i);
-		*pdisp = *sptr;
-	}
-	*pdisp = 0x00;
-	pdisp++;
+	showDigit(buf[0]);
+	SPACELINE;
+	showDigit(buf[1]);
+	SPACELINE;
+	showDigit(buf[2]);
+	SPACELINE;
+#ifndef _DEBUG_
 	*pdisp = 0x03;
 	pdisp++;
 	*pdisp = 0x03;
 	pdisp++;
-	*pdisp = 0x00;
-	pdisp++;
-	for(i=0; i<4; i++, pdisp++) {
-		sptr = fptr + (4*buf[3]+i);
-		*pdisp = *sptr;
+	SPACELINE;
+	showDigit(buf[3]);
+#else
+	showMiniDigit(buf[3]);
+	SPACELINE;
+	SPACELINE;
+	SPACELINE;
+	SPACELINE;
+/*
+	switch()
+	{
+		case -1:
+			writeToPtr(0x02);
+			writeToPtr(0x1F);
+			writeToPtr(0x02);
+			break;
+		case 0:
+			SPACELINE;
+			SPACELINE;
+			SPACELINE;
+			break;
+		case 1:
+			writeToPtr(0x20);
+			writeToPtr(0x7C);
+			writeToPtr(0x20);
+			break;
 	}
+*/
+#endif
 
 	return;
 }
 
 void showHumidity(void)
 {
-	static uint8_t buf[5];
-	uint8_t code *sptr;
 	int8_t i;
 	uint16_t humi = 0;
 	if(si7021SensorExists()) {
@@ -472,53 +524,28 @@ void showHumidity(void)
 	}
 	
 	if( buf[0] == 0 ) {
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[1]+i);
-			*pdisp = *sptr;
-		}
-		*pdisp = 0x00;
-		pdisp++;
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[2]+i);
-			*pdisp = *sptr;
-		}
-		*pdisp = 0x00;
-		pdisp++;
+		showDigit(buf[1]);
+		SPACELINE;
+		showDigit(buf[2]);
+		SPACELINE;
 		*pdisp = 0x03;
 		pdisp++;
-		*pdisp = 0x00;
-		pdisp++;
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[3]+i);
-			*pdisp = *sptr;
-		}
+		SPACELINE;
+		showDigit(buf[3]);
 	}
 	else {
-		*pdisp = 0x00;
-		pdisp++;
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[0]+i);
-			*pdisp = *sptr;
-		}
-		*pdisp = 0x00;
-		pdisp++;
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[1]+i);
-			*pdisp = *sptr;
-		}
-		*pdisp = 0x00;
-		pdisp++;
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[2]+i);
-			*pdisp = *sptr;
-		}
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
+		showDigit(buf[0]);
+		SPACELINE;
+		showDigit(buf[1]);
+		SPACELINE;
+		showDigit(buf[2]);
+		SPACELINE;
 	}
-	*pdisp = 0x00;
-	pdisp++;
+	SPACELINE;
 	*pdisp = 0x62;
 	pdisp++;
+//	*(pdisp++) = 0x62;
 	*pdisp = 0x64;
 	pdisp++;
 	*pdisp = 0x08;
@@ -554,7 +581,7 @@ void showMainScreen(void)
 		case WI_PRES: { showPressure(); break;}
 		case WI_HUMI: { showHumidity(); break;}
 		case WI_HOLY: { showRenderBuffer(); break;}
-		default: { showTime(); break;}
+		default: { widgetNumber = WI_TIME; showTime(); break;}
 	}
 
 	return;
@@ -648,16 +675,12 @@ void showDateEdit(void)
 	else { flash = 0; }
 
 	if(rtc.etm == RTC_YEAR) {
-		*pdisp = 0x00;
-		pdisp++;
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
+		SPACELINE;
 		showNumber(20, 0, 0);
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 		showNumber(rtc.year, !((rtc.etm != RTC_YEAR)||(flash && (rtc.etm == RTC_YEAR))), 0);
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 	}
 	else {
 		showNumber(rtc.date, !((rtc.etm != RTC_DATE)||(flash && (rtc.etm == RTC_DATE))), 1);
@@ -794,8 +817,7 @@ void showDispEdit(void)
 	for(i=0; i<16; i++, pdisp++) {
 		*pdisp = pic_Type[i];
 	}
-	*pdisp = 0x00;
-	pdisp++;
+	SPACELINE;
 
 	for(i=0; i<5; i++, pdisp++) {
 		*pdisp = temperature_font[5*eep.dispMode+i];
@@ -839,8 +861,7 @@ void showBrightEdit(void)
 	for(i=0; i<16; i++, pdisp++) {
 		*pdisp = pic_BrEdit[i];
 	}
-	*pdisp = 0x00;
-	pdisp++;
+	SPACELINE;
 
 	for(i=0; i<5; i++, pdisp++) {
 		*pdisp = temperature_font[5*eep.bright+i];
@@ -882,8 +903,6 @@ void changeTimeCoef(int8_t diff)
 
 void showTimeCoefEdit(void)
 {
-	static uint8_t buf[3];
-	uint8_t code *sptr;
 	int8_t i;
 	uint8_t coef;
 	bit sign;
@@ -927,34 +946,22 @@ void showTimeCoefEdit(void)
 			*pdisp = 0x08;
 		}
 
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 	}
 
 	if(buf[0] > 0 ) {
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[0]+i);
-			*pdisp = *sptr;
-		}
+		showDigit(buf[0]);
 
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 	}
 
 	if((buf[0] > 0 )||(buf[1] > 0 )) {
-		for(i=0; i<4; i++, pdisp++) {
-			sptr = fptr + (4*buf[1]+i);
-			*pdisp = *sptr;
-		}
+		showDigit(buf[1]);
 
-		*pdisp = 0x00;
-		pdisp++;
+		SPACELINE;
 	}
 
-	for(i=0; i<4; i++, pdisp++) {
-		sptr = fptr + (4*buf[2]+i);
-		*pdisp = *sptr;
-	}
+	showDigit(buf[2]);
 
 	return;
 }
@@ -980,7 +987,7 @@ void wiNext(void)
 	if( screenTime > widgets[widgetNumber].sec ) {
 		widgetNumber++;
 		screenTime = 0;
-		if( widgetNumber > ELEMENTS(widgets) ) {
+		if(widgetNumber > ELEMENTS(widgets)) {
 			widgetNumber = WI_TIME;
 		}
 		if(widgetNumber == WI_PRES && !bmxx80HaveSensor()) {
@@ -991,11 +998,12 @@ void wiNext(void)
 		}
 		if(widgetNumber == WI_HOLY) {
 			if(holiday) {
-				scroll_index = 0;
+				scroll_start = 1;
+				scroll_disp_index = DISPLAYSIZE;
 			}
 			else {
 				widgetNumber = WI_TIME;
-				scroll_index = -1;
+				scroll_start = 0;
 			}
 		}
 	}
@@ -1015,8 +1023,125 @@ void wiTime(void)
 
 void wiHoly(void)
 {
-	if(scroll_index < 0){
+	if(scroll_start == 0){
 		wiNext();
+	}
+
+	return;
+}
+
+uint8_t font_char_to_index(uint8_t chr_code)
+{
+	if(chr_code >= 0xA0) {
+		chr_code -= 0x40;
+	}
+	else if(chr_code >= 0x20) {
+		chr_code -= 0x20;
+	}
+	else {
+		chr_code = 0x1F;
+	}
+
+	return chr_code;
+}
+
+void render_buff_txt(void)
+{
+	uint8_t r_index, r_line, chr_code, fnt_data;
+	
+	r_index = rndr_index;
+	r_line = rndr_line;
+
+	if(r_line >= 5)
+	{
+		SPACELINE;
+		rndr_disp_index++;
+		r_index++;
+		r_line = 0;
+	}
+	while(rndr_disp_index < DISPLAYSIZE)
+	{
+		if(r_index < msg_length)
+		{
+			chr_code = *(msg_str + r_index);
+			chr_code = font_char_to_index(chr_code);
+			for(; r_line < 5; r_line++) {
+				fnt_data = font_cp1251_07[5 * chr_code + r_line];
+				if( fnt_data != VOID ) {
+					if(rndr_disp_index < DISPLAYSIZE)
+					{
+						writeToPtr(fnt_data);
+						rndr_disp_index++;
+					}
+				}
+				else {
+					break;
+				}
+			}
+			r_index++;
+			r_line = 0;
+		}
+		if(rndr_disp_index < DISPLAYSIZE)
+		{
+			SPACELINE;
+			rndr_disp_index++;
+		}
+	}
+
+	return;
+}
+
+void stopRender(void)
+{
+	scroll_start = 0;
+	rndr_index = 0;
+	rndr_line = 0;
+	widgetNumber = WI_TIME;
+	screenTime = 0;
+
+	return;
+}
+
+void incRenderIndex(void)
+{
+	uint8_t chr_code, fnt_data;
+
+	if(scroll_start)
+	{
+		if(scroll_disp_index > 0)
+		{
+			scroll_disp_index -= 1;
+		}
+		else
+		{
+			rndr_line++;
+		}
+
+		if(rndr_index == msg_length)
+		{
+			stopRender();
+			return;
+		}
+		if(rndr_line < 5)
+		{
+			chr_code = *(msg_str + rndr_index);
+			chr_code = font_char_to_index(chr_code);
+			fnt_data = font_cp1251_07[5 * chr_code + rndr_line];
+			if(fnt_data == VOID)
+			{
+				rndr_line = 5;
+			}
+		}
+		if(rndr_line > 5)
+		{
+			rndr_index++;
+			rndr_line = 0;
+			if(rndr_index == msg_length)
+			{
+				stopRender();
+				return;
+			}
+		}
 	}
 
 	return;
@@ -1024,60 +1149,38 @@ void wiHoly(void)
 
 void showRenderBuffer(void)
 {
-	uint8_t i;
-
-	int16_t ind = scroll_index - DISPLAYSIZE;
-	if( scroll_index > (render_buffer_size + DISPLAYSIZE )) {
-		scroll_index = -1;
-		widgetNumber = 0; screenTime = 0;
+	rndr_disp_index = 0;
+	
+	if(scroll_start == 0)
+	{
+		stopRender();
+		return;
 	}
 
-	for(i=0; i<DISPLAYSIZE; i++) {
-		if(( ind + i >= 0 )&&(ind + i < render_buffer_size )) {
-			disp[i] = render_buffer[(uint8_t)(ind + i)];
+	if(scroll_disp_index > 0)
+	{
+		while(rndr_disp_index < scroll_disp_index)
+		{
+			SPACELINE;
+			rndr_disp_index++;
 		}
-		else {
-			disp[i] = 0x00;
+		if(rndr_disp_index < DISPLAYSIZE)
+		{
+				render_buff_txt();
 		}
+	}
+	else
+	{
+		render_buff_txt();
 	}
 
 	return;
 }
 
-void writeRenderBuffer(uint8_t value)
+void setRenderString(uint8_t length, char *str)
 {
-	if ( render_buffer_size < RENDSERBUFFERSIZE) {
-		render_buffer[render_buffer_size++] = value;
-	}
-
-	return;
-}
-
-void renderHoliday(uint8_t length, char *str)
-{
-	uint8_t i, j, t, c;
-
-	render_buffer_size = 0;
-
-	for(i=0; i < (length - 1); i++, str++) {
-		c = *str;
-		if( c >= 0xA0 ) {
-			c -= 0x40;
-		}
-		else if( c >= 0x20 ) {
-			c -= 0x20;
-		}
-		else {
-			c = 0x1F;
-		}
-		for(j=0; j<5; j++) {
-			t = font_cp1251_07[5*c+j];
-			if( t != VOID ) {
-				writeRenderBuffer(t);
-			}
-		}
-		writeRenderBuffer(0x00);
-	}
+	msg_length = length - 1;
+	msg_str = str;
 
 	return;
 }
@@ -1112,43 +1215,3 @@ static char *mkNumberString(int16_t value, uint8_t width, uint8_t lead)
 	return strbuf;
 }
 */
-
-#ifdef _DEBUG_
-
-void showTestRender(void)
-{
-	/*
-	 э = \xFD
-	*/
-	//char test[] = "TEST RENDER!!! Proverka???\x63";
-	//char test[] = "С Новым Годом!!!";
-	//char test[] = "ШЩЪЫЬЭЮЯшщъыь\xFDюя";
-	char code test[] = "Проверка рендеринга, на длину строки.";
-	uint8_t i,j,t;
-	uint8_t c;
-
-	scroll_index = 0;
-	for(i=0; i < strlen(test); i++) {
-		c = test[i];
-		if( c >= 0xA0 ) {
-			c -= 0x40;
-		}
-		else if( c >= 0x20 ) {
-			c -= 0x20;
-		}
-		else {
-			c = 0x1F;
-		}
-		for(j=0; j<5; j++) {
-			t = font_cp1251_07[5*c+j];
-			if( t != VOID ) {
-				writeRenderBuffer(t);
-			}
-		}
-		writeRenderBuffer(0x00);
-	}
-
-	return;
-}
-
-#endif
