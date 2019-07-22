@@ -309,25 +309,26 @@ void showMiniDigit(uint8_t digit)
 
 void showNumber(uint8_t num, uint8_t clean, uint8_t dig )
 {
-	uint8_t i, code *sptr;
-
-	for(i=0; i<4; i++, pdisp++) {
-			if(!clean&&(!dig ||((num/10) > 0 ))) {
-			sptr = fptr + (4*(num/10)+i);
-			*pdisp = *sptr;
-		}
-		else
-			*pdisp = 0x00;
+	if(!clean&&(!dig ||((num/10) > 0 ))) {
+		showDigit(num/10);
 	}
-	*pdisp = 0x00;
-	pdisp++;
-	for(i=0; i<4; i++, pdisp++) {
-		if(!clean) {
-			sptr = fptr + (4*(num%10)+i);
-			*pdisp = *sptr;
-		}
-		else
-			*pdisp = 0x00;
+	else
+	{
+		SPACELINE;
+		SPACELINE;
+		SPACELINE;
+		SPACELINE;
+	}
+	SPACELINE;
+	if(!clean) {
+		showDigit(num%10);
+	}
+	else
+	{
+		SPACELINE;
+		SPACELINE;
+		SPACELINE;
+		SPACELINE;
 	}
 
 	return;
