@@ -136,7 +136,7 @@ void displayRefresh(void)
 			P3 = ((disp[k]>>6)&0x01)|((disp[k]>>4)&0x02)|((disp[k]>>2)&0x04)| (disp[k]&0x08)|((disp[k]<<2)&0x10)|((disp[k]<<4)&0x20)|((disp[k]<<6)&0x40);
 		}
 		columnrefnum++;
-		if( columnrefnum > 21 ) {
+		if(columnrefnum >= DISPLAYSIZE) {
 			columnrefnum = 0;
 			reversed = key_mer;
 			if(refstart==0) {

@@ -3,7 +3,6 @@
 #include "key.h"
 
 uint8_t sensTimer = 0;
-uint8_t scrollTimer = 0;
 uint16_t alarmTimer = 0;
 static volatile uint8_t beepTimer = 0;
 static volatile uint8_t secTimer = TIME_SEC;
@@ -47,8 +46,6 @@ void CheckBtn(void)
 		secTimer = TIME_SEC;
 		if (sensTimer)
 			sensTimer--;
-		if (scrollTimer)
-			scrollTimer--;
 
 		if (alarmTimer)
 			alarmTimer--;
